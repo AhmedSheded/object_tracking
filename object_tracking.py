@@ -2,14 +2,21 @@ import cv2
 import numpy as np
 from object_detection import ObjectDetection
 import math
+import os
 
 # Initialize Object Detection
 od = ObjectDetection()
 
 cap = cv2.VideoCapture("traffic.mp4")
 
+fourcc = cv2.VideoWriter_fourcc(*'MP4V')
+width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+name = 'data/video'+str(len(os.listdir('data'))+1)+'.mp4'
+writer = cv2.VideoWriter(name, fourcc, 30, (width, height))
+
 # Initialize count
-count = 0
+count = 1
 center_points_prev_frame = []
 
 tracking_objects = {}
@@ -56,7 +63,7 @@ while True:
                 distance = math.hypot(pt2[0] - pt[0], pt2[1] - pt[1])
 
                 # Update IDs position
-                if distance < 20:
+                if distance < 15:
                     tracking_objects[object_id] = pt
                     object_exists = True
                     if pt in center_points_cur_frame:
@@ -82,7 +89,7 @@ while True:
     print("CUR FRAME LEFT PTS")
     print(center_points_cur_frame)
 
-
+    writer.write(frame)
     cv2.imshow("Frame", frame)
 
     # Make a copy of the points
@@ -93,4 +100,5 @@ while True:
         break
 
 cap.release()
+writer.release()
 cv2.destroyAllWindows()
